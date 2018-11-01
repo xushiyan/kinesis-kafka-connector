@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Schema.Type;
 import org.apache.kafka.connect.data.Struct;
@@ -15,7 +17,10 @@ import org.apache.kafka.connect.sink.SinkRecord;
 
 import com.amazonaws.services.kinesisfirehose.model.Record;
 
+
 public class DataUtility {
+
+	private static final Gson gson = new GsonBuilder().create();
 
 	/**
 	 * Parses Kafka Values
@@ -28,7 +33,10 @@ public class DataUtility {
 	 * @return Parsed bytebuffer as per schema type
 	 */
 	public static ByteBuffer parseValue(Schema schema, Object value) {
-		Schema.Type t = schema.type();
+		Schema.Type t = Schema.Type.MAP;
+		if (schema != null) {
+			t = schema.type();
+		}
 		switch (t) {
 		case INT8:
 			ByteBuffer byteBuffer = ByteBuffer.allocate(1);
@@ -88,7 +96,9 @@ public class DataUtility {
 				return (ByteBuffer) value;
 		case MAP:
 			// TO BE IMPLEMENTED
-			return ByteBuffer.wrap(null);
+			System.out.println(value.toString());
+			String json = gson.toJson(value);
+			return ByteBuffer.wrap(json.getBytes());
 		case STRUCT:
 
 			List<ByteBuffer> fieldList = new LinkedList<ByteBuffer>();
